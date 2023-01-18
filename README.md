@@ -1,4 +1,4 @@
-A DraftKings NHL scraper [easily modified] compatible with both pregame and live markets. 
+A DraftKings NHL [easily modified] scraper compatible with both pregame and live markets. 
 
 - Collect pregame odds -> Excel
 - Live stream odds updates 
