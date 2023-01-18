@@ -1,7 +1,8 @@
 import requests
 import json
+from traceback import print_exc
 
-id_dict = {"NHL": "42133"}
+id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648"}
 
 class DraftKings:
     def __init__(self, league = "NHL"):
@@ -33,22 +34,30 @@ class DraftKings:
             # List that will contain dicts [one for each market]
             market_list = []
             for market in game:
-                market_name = market['label']
-                if market_name == "Moneyline":
-                    home_team = market['outcomes'][0]['label']
-                    away_team = market['outcomes'][1]['label']
-                # List that will contain dicts [one for each outcome]
-                outcome_list = []
-                for outcome in market['outcomes']:
-                    try:
-                        # if there's a line it should be included in the outcome description
-                        line = outcome['line']
-                        outcome_label = outcome['label'] + " " + str(line)
-                    except:
-                        outcome_label = outcome['label']
-                    outcome_odds = outcome['oddsDecimal']
-                    outcome_list.append({"label": outcome_label, "odds": outcome_odds})
-                market_list.append({"marketName": market_name, "outcomes": outcome_list})
+                try:
+                    market_name = market['label']
+                    if market_name == "Moneyline":
+                        home_team = market['outcomes'][0]['label']
+                        away_team = market['outcomes'][1]['label']
+                    # List that will contain dicts [one for each outcome]
+                    outcome_list = []
+                    for outcome in market['outcomes']:
+                        try:
+                            # if there's a line it should be included in the outcome description
+                            line = outcome['line']
+                            outcome_label = outcome['label'] + " " + str(line)
+                        except:
+                            outcome_label = outcome['label']
+                        outcome_odds = outcome['oddsDecimal']
+                        outcome_list.append({"label": outcome_label, "odds": outcome_odds})
+                    market_list.append({"marketName": market_name, "outcomes": outcome_list})
+                except:
+                    # if there was a problem with a specific market, continue with the next one...
+                    # for example odds for totals not available as early as the other markets for NBA
+                    # games a few days away
+                    print_exc()
+                    print()
+                    continue
             games_list.append({"game": f"{home_team} v {away_team}", "markets": market_list})
 
         return games_list
