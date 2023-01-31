@@ -1,8 +1,12 @@
+import asyncio
+import websockets
 import requests
 import json
 from traceback import print_exc
+from stream_draftkings import stream
 
-id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648"}
+id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648", "England - Championship": "40817",
+           "Portugal - Primeira Liga": "44069"}
 
 class DraftKings:
     def __init__(self, league = "NHL"):
@@ -12,7 +16,21 @@ class DraftKings:
 
         :league str: Name of the league, NHL by default
         """
-        self.pregame_url = f"https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/{id_dict[league]}?format=json"
+        self.league = league
+        self.pregame_url = f"https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/{id_dict[self.league]}?format=json"
+        self.uri = "wss://ws-draftkingseu.pusher.com/app/490c3809b82ef97880f2?protocol=7&client=js&version=7.3.0&flash=false"
+
+    def get_event_ids(self) -> dict:
+        """
+        Finds all the games & their event_ids for the given league
+
+        :rtype: dict
+        """
+        event_ids = {}
+        response = requests.get(self.pregame_url).json()
+        for event in response['eventGroup']['events']:
+            event_ids[event['name']] = event['eventId']
+        return event_ids
 
     def get_pregame_odds(self) -> list:
         """
@@ -51,16 +69,34 @@ class DraftKings:
                         outcome_odds = outcome['oddsDecimal']
                         outcome_list.append({"label": outcome_label, "odds": outcome_odds})
                     market_list.append({"marketName": market_name, "outcomes": outcome_list})
-                except:
-                    # if there was a problem with a specific market, continue with the next one...
-                    # for example odds for totals not available as early as the other markets for NBA
-                    # games a few days away
-                    print_exc()
-                    print()
-                    continue
+                except Exception as e:
+                    if self.league == "NBA" and "label" in str(e):
+                        # odds for NBA totals are not available as early as the other markets for
+                        # games a few days away, thus raises a KeyError: 'label'
+                        # in this case we simply ignore the error and continue with the next market
+                        continue
+                    else:
+                        # if there was another problem with a specific market, print the error and
+                        # continue with the next one...
+                        print_exc()
+                        print()
+                        continue
             games_list.append({"game": f"{home_team} v {away_team}", "markets": market_list})
 
         return games_list
+
+    def live_odds_stream(self, event_id = None, markets = None):
+        """
+        Sets up the live odds stream by calling the async stream function with given parameters
+
+        :param event_id: If an event_id is specified [else it's None], the stream/listener considers updates
+                         only if they're updates for that particular game
+        :param markets list: If a list of markets is specified [else markets == None], the stream/listener considers updates
+                             only if they're updates for those particular markets
+                             Hint: If uncertain about market names, run it for a minute for all markets and collect the correct
+                             names of the markets this way
+        """
+        asyncio.run(stream(uri = self.uri, league_id = id_dict[self.league], event_id = event_id, markets = markets))
 
     def store_as_json(self, games_list, file_path: str = None):
         """
@@ -78,12 +114,6 @@ class DraftKings:
             print("Content successfully dumped into 'NHL.json'")
 
     def to_excel(self, games_list):
-        """
-        ...
-        """
-        pass
-
-    def live_odds_stream(self, game):
         """
         ...
         """
