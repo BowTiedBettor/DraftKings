@@ -1,5 +1,4 @@
 from draftkings_class import DraftKings
-import json
 
 """
 Create a DraftKings class object
