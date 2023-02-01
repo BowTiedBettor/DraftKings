@@ -3,7 +3,7 @@ import websockets
 import requests
 import json
 from traceback import print_exc
-from stream_draftkings import stream
+from draftkings_stream import stream
 
 id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648", "England - Championship": "40817",
            "Portugal - Primeira Liga": "44069"}
