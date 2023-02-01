@@ -5,8 +5,8 @@ from traceback import print_exc
 
 async def stream(uri, league_id, event_id, markets):
     """
-    Sets up a connection with the server that are pushing new odds to the DraftKings website
-    & awaits further updates. As soon as updated odds information arrives it prints all the relevant
+    Sets up a connection with the server which is pushing new odds to the DraftKings website.
+    Awaits further updates. As soon as updated odds information arrives it prints all the relevant
     information regarding the specific odds update.
 
     The function is meant to be called from the live_odds_stream method inside the DraftKings class
