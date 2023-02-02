@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 from traceback import print_exc
+
 from exceptions import WSEventTypeException, EventIdException, MarketException
 
 async def stream(uri: str, league_id: str, event_ids: list, markets: list):
