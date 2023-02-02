@@ -83,7 +83,7 @@ async def stream(uri: str, league_id: str, event_ids: list, markets: list):
                     print("Connection established!")
                     continue
                 elif event == 'pusher_internal:subscription_succeeded':
-                    print("Subscription succeeded, awaits new odds uppdates...")
+                    print("Subscription succeeded, awaits new odds updates...")
                     continue
                 else:
                     # print_exc()
