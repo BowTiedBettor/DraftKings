@@ -5,8 +5,7 @@ import json
 from traceback import print_exc
 from draftkings_stream import stream
 
-id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648", "England - Championship": "40817",
-           "Portugal - Primeira Liga": "44069"}
+id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648"}
 
 class DraftKings:
     def __init__(self, league = "NHL"):
@@ -85,18 +84,18 @@ class DraftKings:
 
         return games_list
 
-    def live_odds_stream(self, event_id = None, markets = None):
+    def live_odds_stream(self, event_ids = None, markets = None):
         """
         Sets up the live odds stream by calling the async stream function with given parameters
 
-        :param event_id: If an event_id is specified [else it's None], the stream/listener considers updates
-                         only if they're updates for that particular game
+        :param event_id list: If a list of event_ids is specified [else it's None], the stream/listener considers updates
+                              only if they're updates for those particular games
         :param markets list: If a list of markets is specified [else markets == None], the stream/listener considers updates
                              only if they're updates for those particular markets
                              Hint: If uncertain about market names, run it for a minute for all markets and collect the correct
                              names of the markets this way
         """
-        asyncio.run(stream(uri = self.uri, league_id = id_dict[self.league], event_id = event_id, markets = markets))
+        asyncio.run(stream(uri = self.uri, league_id = id_dict[self.league], event_ids = event_ids, markets = markets))
 
     def store_as_json(self, games_list, file_path: str = None):
         """
