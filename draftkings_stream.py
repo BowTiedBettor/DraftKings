@@ -2,8 +2,9 @@ import asyncio
 import websockets
 import json
 from traceback import print_exc
+from exceptions import WSEventTypeException, EventIdException, MarketException
 
-async def stream(uri, league_id, event_id, markets):
+async def stream(uri: str, league_id: str, event_ids: list, markets: list):
     """
     Sets up a connection with the server which is pushing new odds to the DraftKings website.
     Awaits further updates. As soon as updated odds information arrives it prints all the relevant
@@ -14,8 +15,8 @@ async def stream(uri, league_id, event_id, markets):
     :param uri str: URI for the web server
     :param league_id str: Id for the league
     :param timeout int: Number of seconds for the stream to keep on going
-    :param event_id: If an event_id is specified [else it's None], the stream/listener considers updates
-                     only if they're updates for that particular game
+    :param event_id list: If a list of event_ids is specified [else it's None], the stream/listener considers updates
+                          only if they're updates for those particular games
     :param markets list: If a list of markets is specified [else markets == None], the stream/listener considers updates
                          only if they're updates for those particular markets
                          Hint: If uncertain about market names, run it for a minute for all markets and collect the correct
@@ -26,34 +27,39 @@ async def stream(uri, league_id, event_id, markets):
     try:
         # connects to the web server
         ws = await websockets.connect(uri)
+
         # sends a subscription message to the server with info regarding the odds data we want to receive updates on
         await ws.send(
             json.dumps({"event":"pusher:subscribe","data":{"auth":"","channel":f"nj_ent-eventgroupv2-{league_id}"}}
                 )
             )
+
         while True:
             try:
                 new_message = await ws.recv()
                 message_json = json.loads(new_message)
+
                 event = message_json['event']
                 if not event == "offer-updated":
-                    # only interested in events containing odds updates
-                    raise Exception("wrong_event_type")
+                    raise WSEventTypeException(event)
 
                 content = json.loads(message_json['data'])
-                if event_id:
-                    # if a specific event_id is provided, this checks whether
+                if event_ids:
+                    # if a list of event_ids is provided, this checks whether
                     # the update is relevant or not
-                    if not event_id == content['data'][0]['eventId']:
-                        raise Exception("wrong_event_id")
+                    if not content['data'][0]['eventId'] in event_ids:
+                        raise EventIdException(content['data'][0]['eventId'])
 
                 label = content['data'][0]['label']
                 if markets:
                     # if a list of wanted markets is provided, this checks whether
                     # the update is relevant or not
                     if not label in markets:
-                        raise Exception("wrong_market")
+                        raise MarketException(label)
 
+                # if the WS event type is correct [offer-updated], the event_id is
+                # for one of the games of interest & finally the market is included in the list of
+                # wanted markets, then the below section is executed
                 outcomes = content['data'][0]['outcomes']
                 print(f"New odds update for '{label}'")
                 for outcome in outcomes:
@@ -67,26 +73,33 @@ async def stream(uri, league_id, event_id, markets):
 
             except websockets.WebSocketException:
                 # if there's a problem with the connection it breaks the while loop
-                # and closes the connection [could easily be adjusted to reconnect and so on]
+                # and closes the connection [easily be adjusted to reconnect]
                 print_exc()
                 break
 
-            except Exception as e:
-                if str(e) == "wrong_event_type":
-                    if event == 'pusher:connection_established':
-                        print("Connection established!")
-                        continue
-                    elif event == 'pusher_internal:subscription_succeeded':
-                        print("Subscription succeeded, awaits new odds uppdates...")
-                        continue
-                    else:
-                        continue
-                elif str(e) == "wrong_event_id":
+            except WSEventTypeException:
+                if event == 'pusher:connection_established':
+                    print("Connection established!")
                     continue
-                elif str(e) == "wrong_market":
+                elif event == 'pusher_internal:subscription_succeeded':
+                    print("Subscription succeeded, awaits new odds uppdates...")
                     continue
                 else:
-                    print_exc()
+                    # print_exc()
+                    continue
+
+            except EventIdException:
+                # print_exc()
+                continue
+
+            except MarketException:
+                # print_exc()
+                continue
+
+            except Exception:
+                print_exc()
+
         await ws.close()
+
     except:
         print_exc()
