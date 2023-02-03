@@ -3,7 +3,7 @@ from draftkings_class import DraftKings
 """
 Create a DraftKings class object
 """
-dk = DraftKings(league = "NBA")
+dk = DraftKings(league="NBA")
 
 """
 Find all games & their event_ids
@@ -15,4 +15,5 @@ for game, event_id in game_ids.items():
 """
 Set up a stream awaiting odds updates for the Moneyline market [all games]
 """
-dk.live_odds_stream(event_ids = ["28335346", "28335344", "28335347"], markets = ['Moneyline'])
+dk.live_odds_stream(
+    event_ids=["28335346", "28335344", "28335347"], markets=['Moneyline'])
