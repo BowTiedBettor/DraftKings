@@ -5,10 +5,11 @@ import json
 from traceback import print_exc
 from draftkings_stream import stream
 
-id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648"}
+id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648", "England - Premier League": "40253"}
+
 
 class DraftKings:
-    def __init__(self, league = "NHL"):
+    def __init__(self, league="NHL"):
         """
         Initializes a class object
         Include more leagues simply by adding the league with its ID to id_dict above
@@ -66,8 +67,10 @@ class DraftKings:
                         except:
                             outcome_label = outcome['label']
                         outcome_odds = outcome['oddsDecimal']
-                        outcome_list.append({"label": outcome_label, "odds": outcome_odds})
-                    market_list.append({"marketName": market_name, "outcomes": outcome_list})
+                        outcome_list.append(
+                            {"label": outcome_label, "odds": outcome_odds})
+                    market_list.append(
+                        {"marketName": market_name, "outcomes": outcome_list})
                 except Exception as e:
                     if self.league == "NBA" and "label" in str(e):
                         # odds for NBA totals are not available as early as the other markets for
@@ -80,11 +83,12 @@ class DraftKings:
                         print_exc()
                         print()
                         continue
-            games_list.append({"game": f"{home_team} v {away_team}", "markets": market_list})
+            games_list.append(
+                {"game": f"{home_team} v {away_team}", "markets": market_list})
 
         return games_list
 
-    def live_odds_stream(self, event_ids = None, markets = None):
+    def live_odds_stream(self, event_ids=None, markets=None):
         """
         Sets up the live odds stream by calling the async stream function with given parameters
 
@@ -95,7 +99,8 @@ class DraftKings:
                              Hint: If uncertain about market names, run it for a minute for all markets and collect the correct
                              names of the markets this way
         """
-        asyncio.run(stream(uri = self.uri, league_id = id_dict[self.league], event_ids = event_ids, markets = markets))
+        asyncio.run(stream(
+            uri=self.uri, league_id=id_dict[self.league], event_ids=event_ids, markets=markets))
 
     def store_as_json(self, games_list, file_path: str = None):
         """
