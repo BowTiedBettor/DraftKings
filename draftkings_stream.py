@@ -5,6 +5,7 @@ from traceback import print_exc
 
 from exceptions import WSEventTypeException, EventIdException, MarketException
 
+
 async def stream(uri: str, league_id: str, event_ids: list, markets: list):
     """
     Sets up a connection with the server which is pushing new odds to the DraftKings website.
@@ -31,9 +32,9 @@ async def stream(uri: str, league_id: str, event_ids: list, markets: list):
 
         # sends a subscription message to the server with info regarding the odds data we want to receive updates on
         await ws.send(
-            json.dumps({"event":"pusher:subscribe","data":{"auth":"","channel":f"nj_ent-eventgroupv2-{league_id}"}}
-                )
-            )
+            json.dumps({"event": "pusher:subscribe", "data": {"auth": "", "channel": f"nj_ent-eventgroupv2-{league_id}"}}
+                       )
+        )
 
         while True:
             try:
