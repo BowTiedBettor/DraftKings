@@ -16,8 +16,7 @@ async def stream(uri: str, league_id: str, event_ids: list, markets: list):
 
     :param uri str: URI for the web server
     :param league_id str: Id for the league
-    :param timeout int: Number of seconds for the stream to keep on going
-    :param event_id list: If a list of event_ids is specified [else it's None], the stream/listener considers updates
+    :param event_ids list: If a list of event_ids is specified [else it's None], the stream/listener considers updates
                           only if they're updates for those particular games
     :param markets list: If a list of markets is specified [else markets == None], the stream/listener considers updates
                          only if they're updates for those particular markets
