@@ -5,7 +5,8 @@ import json
 from traceback import print_exc
 from draftkings_stream import stream
 
-id_dict = {"NHL": "42133", "NFL": "88808", "NBA": "42648", "England - Premier League": "40253"}
+id_dict = {"NHL": "42133", "NFL": "88808",
+           "NBA": "42648", "England - Premier League": "40253"}
 
 
 class DraftKings:
