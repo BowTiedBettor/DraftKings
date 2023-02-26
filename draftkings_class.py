@@ -56,8 +56,8 @@ class DraftKings:
                 try:
                     market_name = market['label']
                     if market_name == "Moneyline":
-                        home_team = market['outcomes'][0]['label']
-                        away_team = market['outcomes'][1]['label']
+                        home_team = market['outcomes'][1]['label']
+                        away_team = market['outcomes'][0]['label']
                     # List that will contain dicts [one for each outcome]
                     outcome_list = []
                     for outcome in market['outcomes']:
